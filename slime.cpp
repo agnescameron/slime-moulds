@@ -527,7 +527,7 @@ void migration(int array[52][102], int s, int n, int food, char printBubble, vec
 //     cout << "entry cell is " << 	temp1[entryCellj][entryCelli] << entryCelli << entryCellj << endl;
 //     cout << "outer cell is " << temp1[outerCellj][outerCelli] << outerCelli << outerCellj << endl;
     
-//     print(temp1);
+     print(temp1);
     
 //     system("sleep 0.2");
 
@@ -540,7 +540,7 @@ void migration(int array[52][102], int s, int n, int food, char printBubble, vec
  	{
  		for(int i = 1; i < 101; i++) 			
 		{
-		    if (temp1[j][i] == 2){
+		    if (temp1[j][i] == 2 || temp1[j][i] == 5){
 		        temp1[j][i] = 1;
 		    }
 
@@ -589,19 +589,17 @@ void migration(int array[52][102], int s, int n, int food, char printBubble, vec
                 break;
             }
       
-            
-       chooseNextBubble(temp1, bubblei, bubblej, bubbleNexti, bubbleNextj, chosenNextBubble);
+      //chooses next cell for the bubble to enter      
+      chooseNextBubble(temp1, bubblei, bubblej, bubbleNexti, bubbleNextj, chosenNextBubble);
       
-       //cout << "choosing" << endl;
-      
-      
+      //adds the previous cell to memorised flow, enters new cell
       temp1[bubbleNextj][bubbleNexti] = 0;
       temp1[bubblej][bubblei] = 3;
 
      
       k = k+1;
       
-               countSize(temp1);
+      countSize(temp1);
       
     if(printBubble == 'y'){
      //prints the path of the bubble through the plasmoid, for reference 
@@ -630,6 +628,14 @@ void migration(int array[52][102], int s, int n, int food, char printBubble, vec
 		    else if(temp1[j][i] == 1 || temp1[j][i] == 3){
 		        temp2[j][i] = 1;
 		        
+		    }
+		    
+		    else if(temp1[j][i] == 4){
+		        temp1[j][i] = 4;
+		    }
+		    
+		     else if(temp1[j][i] == 5){
+		        temp1[j][i] = 5;
 		    }
 		    
 		    else
