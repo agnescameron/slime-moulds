@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <algorithm>
 #include <math.h>
 #include <vector>
 #include <ctime>
@@ -571,16 +572,17 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
     //the location of each food source
 
       do{
-        
+        //cycles through food sources one-by one to test against edge cells
         int foodLoci = foodLocator[a][0];
         int foodLocj = foodLocator[a][1];
         cout << endl << "food coord is " << foodLoci << " " << foodLocj << endl;
         
-        vector<int> distVector; 
+        //fresh initialise distVector each time
+        vector<float> distVector; 
         
         int b = 0;
            do{
-               
+               //calculates the distance of each edge point from the food source
                int edgei = edgeVector[b][0];
                int edgej = edgeVector[b][1];
                
@@ -594,12 +596,18 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
            }while(b < edgeNum);
         
         //scan the vector of distances to obtain the minimum distance co-ordinate for 
-        //that food source. Store in vector of minimum distance co-ords, then use to
-        //generate the 
+        //that food source. Store in vector of minimum distance co-ords
+        
+        // int x = *min_element(distVector.begin(), distVector.end() );
+        // cout << "min element is " <<  x  << endl << endl;
         
         
-        int x = *min_element(distVector.begin(), distVector.end() );
-        cout << "min element is " << x  << endl << endl;
+        auto distPointer = minmax_element (distVector.begin(),distVector.end());
+
+         // print result:
+        cout << "min is " << *distPointer.first << endl;
+        cout << ", at position " << (distPointer.first-distVector.begin()) << endl;
+        
         
         
         a = a+1;
