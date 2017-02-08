@@ -97,8 +97,127 @@ void growth(int array[52][102], int m)
   copy(temp, array);
 }
 
+//this selects the area that the bubble can enter when food present
+void markUpEdge(int array[52][102], vector<int> pointCoords){
+    // this function takes the minimum distances between food sources and edge cells
+    //and marks up possible bubble entrance points. The mechanism for this is to allow
+    //entrance from bubbles within a 5x5 square (eg +- 2).
+        int minPointi = pointCoords[0];
+        int minPointj = pointCoords[1];
+        
+        cout << " min points are " << minPointi << " " << minPointj << endl;
+        
+            for(int i=-2; i < 2; i++){
+                for(int j = -2; j<2; j++){
+                    if(array[minPointj + j][minPointi + i] == 2){
+                        array[minPointj + j][minPointi + i] = 5;
+                    }
+                }
+            }
+    
+}
 
+//calcuates the minimum distance between an edge and a food source
+void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
+    //stuff goes here
+    
+ int a = 0;
 
+    
+  cout << "number of food sources " << food << endl;
+    //create a vector containing every edge element of the slime
+    int edgeNum = 0;
+    vector<vector<int> > edgeVector;
+    
+    	for(int j = 1; j < 51; j++)
+        	{
+            for(int i = 1; i < 101; i++) 			
+	        	{
+                    if(array[j][i] == 2){
+                    vector<int> coord;
+                    
+                    //write co-ordinates of each edge to the vector
+                    coord.push_back(i);
+                    coord.push_back(j);
+                    
+                    //push back the co-ordinates of the edge cell
+                    edgeVector.push_back (coord);
+                    edgeNum = edgeNum + 1;
+	        	}
+		    }
+		}
+		
+		cout << "number of edge cells " << edgeNum << endl;
+		
+		
+    //a vector of the co-ords of each minimum distance edge point
+    //for each food source.
+    
+    //vector<vector <int> > minDist; 
+
+      do{
+        //cycles through food sources one-by one to test against edge cells
+        int foodLoci = foodLocator[a][0];
+        int foodLocj = foodLocator[a][1];
+        cout << endl << "food coord is " << foodLoci << " " << foodLocj << endl;
+        
+        //fresh initialise distVector each time
+        vector<float> distVector; 
+        
+        int b = 0;
+           do{
+               //calculates the distance of each edge point from the food source
+               int edgei = edgeVector[b][0];
+               int edgej = edgeVector[b][1];
+               
+               cout << "edge coord is " << edgei << " " << edgej << endl;
+               
+               double dist = sqrt((double)((edgei - foodLoci)*(edgei - foodLoci) + (edgej - foodLocj)*(edgej - foodLocj)));
+
+               cout << "distance  " << dist << endl;
+               distVector.push_back (dist);
+               b = b+1;
+           }while(b < edgeNum);
+        
+        //scan the vector of distances to obtain the minimum distance co-ordinate for 
+        //that food source. Store in vector of minimum distance co-ords
+        
+        // int x = *min_element(distVector.begin(), distVector.end() );
+        // cout << "min element is " <<  x  << endl << endl;
+        
+        
+        auto distPointer = minmax_element (distVector.begin(),distVector.end());
+
+         // print result:
+        cout << "min is " << *distPointer.first << endl;
+        cout << ", at position " << (distPointer.first-distVector.begin()) << endl;
+            
+        int point = (distPointer.first-distVector.begin());
+        
+        vector <int> pointCoords;
+        
+        int pointCoordi = edgeVector[point][0];
+        int pointCoordj = edgeVector[point][1];
+        
+        //creates a vector of co-ordinates    
+        pointCoords.push_back(pointCoordi);
+        pointCoords.push_back(pointCoordj);
+        
+        
+        cout << endl << "co-ords of points are " << pointCoordi << " "<< pointCoordj << endl; 
+        cout << "corresponding food co-ords are " << foodLoci << " " << foodLocj << endl << endl;
+        
+        
+        markUpEdge(array, pointCoords);
+        
+        print(array);
+        
+        a = a+1;
+        
+  	}while(a < food);
+}
+
+//checks if the bubble is on the edge of the slime
 void checkOnEdge(int array[52][102], int s, int bubblei, int bubblej, bool &isOnEdge){
 //checks each surrounding square in turn, incrementing t each time one is found to be empty
 //if the number of empty cells, t, is greater than or equal to s, the cell is on the edge
@@ -153,7 +272,7 @@ void checkOnEdge(int array[52][102], int s, int bubblei, int bubblej, bool &isOn
       }
 }
 
-
+//checks if the bubble has become trapped (memorised flow)
 void checkTrapped(int array[52][102], int bubblei, int bubblej, bool &isTrapped){
 //checks each surrounding square in turn, incrementing t each time one is found to be empty
 //if the number of empty cells, t, is greater than or equal to s, the cell is on the edge
@@ -180,7 +299,7 @@ void checkTrapped(int array[52][102], int bubblei, int bubblej, bool &isTrapped)
 
 }
 
-
+//calculates the size of the slime
 void countSize(int array[52][102]){
     //counts the size of the slime
     
@@ -197,11 +316,10 @@ void countSize(int array[52][102]){
  	cout << "seed size " << slimeSize;
 }
 
-
-void chooseCell (int array[52][102], int food, int &outerCelli, int &outerCellj, int &entryCelli, int &entryCellj){
+//chooses the entrance point to the slime
+void chooseCell (int array[52][102], int food, int &outerCelli, int &outerCellj, int &entryCelli, int &entryCellj, vector<vector<int> > foodLocator){
   //choose a boundary (type 2) cell to become the point of entry.
   //Randomly selects an adjacent empty cell to be the 'bubble'
-  //Initially, just random though intend to add potential for eg chemotaxis.
   
   bool chosenCell = false;
   bool chosenBubble = false;
@@ -230,8 +348,21 @@ void chooseCell (int array[52][102], int food, int &outerCelli, int &outerCellj,
   }
   
   else{
+      //finds the areas of edge closest to food sources
       
-      //labelMatrix - 
+      foodZones(array, food, foodLocator);
+      cout << "got after foodZones " << endl;
+       do{
+        int rani = rand() %102;
+        int ranj = rand() %52;
+  
+       if (array[ranj][rani] == 5){
+          entryCelli = rani;
+          entryCellj = ranj;
+          chosenCell = true;
+        }
+
+      }while(chosenCell == false);
   }
    //choose the empty cell to swap with, by randomly guessing neighbouring squares: if the square
     //is empty, the cell is chosen
@@ -365,7 +496,7 @@ void chooseNextBubble(int array[52][102], int &bubblei, int &bubblej, int &bubbl
  }
  
 
-void migration(int array[52][102], int s, int n, int food, char printBubble)
+void migration(int array[52][102], int s, int n, int food, char printBubble, vector<vector<int> > foodLocator)
 {
 //This is the migratory phase of slime simulation. During this phase, the slime no longer
 //expands, and instead re-forms itself by randomly absorbing surrounding empty cells 
@@ -386,7 +517,7 @@ void migration(int array[52][102], int s, int n, int food, char printBubble)
   int entryCelli;
   int entryCellj; 
   
-  chooseCell(array, food, outerCelli, outerCellj, entryCelli, entryCellj);
+  chooseCell(array, food, outerCelli, outerCellj, entryCelli, entryCellj, foodLocator);
 
  	//the bubble enters the slime
  	
@@ -525,6 +656,7 @@ void checkFood(int array[52][102]){
  	cout << "food sources" << foodNum;
 }
 
+
 void checkSeeds(int array[52][102]){
     int seedNum = 0;
  for(int j = 1; j < 51; j++)
@@ -537,124 +669,6 @@ void checkSeeds(int array[52][102]){
 		
  	}
  	cout << "number of seed cells " << seedNum;
-}
-
-void markUpEdge(int array[52][102], vector<int> pointCoords){
-    // this function takes the minimum distances between food sources and edge cells
-    //and marks up possible bubble entrance points. The mechanism for this is to allow
-    //entrance from bubbles within a 5x5 square (eg +- 2).
-        int minPointi = pointCoords[0];
-        int minPointj = pointCoords[1];
-        
-        cout << " min points are " << minPointi << " " << minPointj << endl;
-        
-            for(int i=-2; i < 2; i++){
-                for(int j = -2; j<2; j++){
-                    if(array[minPointj + j][minPointi + i] == 2){
-                        array[minPointj + j][minPointi + i] = 5;
-                    }
-                }
-            }
-    
-}
-
-void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
-    //stuff goes here
-    
- int a = 0;
-
-    
-  cout << "number of food sources " << food << endl;
-    //create a vector containing every edge element of the slime
-    int edgeNum = 0;
-    vector<vector<int> > edgeVector;
-    
-    	for(int j = 1; j < 51; j++)
-        	{
-            for(int i = 1; i < 101; i++) 			
-	        	{
-                    if(array[j][i] == 2){
-                    vector<int> coord;
-                    
-                    //write co-ordinates of each edge to the vector
-                    coord.push_back(i);
-                    coord.push_back(j);
-                    
-                    //push back the co-ordinates of the edge cell
-                    edgeVector.push_back (coord);
-                    edgeNum = edgeNum + 1;
-	        	}
-		    }
-		}
-		
-		cout << "number of edge cells " << edgeNum << endl;
-		
-		
-    //a vector of the co-ords of each minimum distance edge point
-    //for each food source.
-    
-    //vector<vector <int> > minDist; 
-
-      do{
-        //cycles through food sources one-by one to test against edge cells
-        int foodLoci = foodLocator[a][0];
-        int foodLocj = foodLocator[a][1];
-        cout << endl << "food coord is " << foodLoci << " " << foodLocj << endl;
-        
-        //fresh initialise distVector each time
-        vector<float> distVector; 
-        
-        int b = 0;
-           do{
-               //calculates the distance of each edge point from the food source
-               int edgei = edgeVector[b][0];
-               int edgej = edgeVector[b][1];
-               
-               cout << "edge coord is " << edgei << " " << edgej << endl;
-               
-               double dist = sqrt((double)((edgei - foodLoci)*(edgei - foodLoci) + (edgej - foodLocj)*(edgej - foodLocj)));
-
-               cout << "distance  " << dist << endl;
-               distVector.push_back (dist);
-               b = b+1;
-           }while(b < edgeNum);
-        
-        //scan the vector of distances to obtain the minimum distance co-ordinate for 
-        //that food source. Store in vector of minimum distance co-ords
-        
-        // int x = *min_element(distVector.begin(), distVector.end() );
-        // cout << "min element is " <<  x  << endl << endl;
-        
-        
-        auto distPointer = minmax_element (distVector.begin(),distVector.end());
-
-         // print result:
-        cout << "min is " << *distPointer.first << endl;
-        cout << ", at position " << (distPointer.first-distVector.begin()) << endl;
-            
-        int point = (distPointer.first-distVector.begin());
-        
-        vector <int> pointCoords;
-        
-        int pointCoordi = edgeVector[point][0];
-        int pointCoordj = edgeVector[point][1];
-        
-        //creates a vector of co-ordinates    
-        pointCoords.push_back(pointCoordi);
-        pointCoords.push_back(pointCoordj);
-        
-        
-        cout << endl << "co-ords of points are " << pointCoordi << " "<< pointCoordj << endl; 
-        cout << "corresponding food co-ords are " << foodLoci << " " << foodLocj << endl << endl;
-        
-        
-        markUpEdge(array, pointCoords);
-        
-        print(array);
-        
-        a = a+1;
-        
-  	}while(a < food);
 }
 
 int main()
@@ -854,7 +868,7 @@ int main()
          }while(limit == -1); 
        }
        
-       migration(todo, s, n, food, printBubble);
+       migration(todo, s, n, food, printBubble, foodLocator);
        cout << "printing" << endl;
        print(todo);
        system("sleep .2");
