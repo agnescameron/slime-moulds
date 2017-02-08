@@ -539,6 +539,25 @@ void checkSeeds(int array[52][102]){
  	cout << "number of seed cells " << seedNum;
 }
 
+void markUpEdge(int array[52][102], vector<int> pointCoords){
+    // this function takes the minimum distances between food sources and edge cells
+    //and marks up possible bubble entrance points. The mechanism for this is to allow
+    //entrance from bubbles within a 5x5 square (eg +- 2).
+        int minPointi = pointCoords[0];
+        int minPointj = pointCoords[1];
+        
+        cout << " min points are " << minPointi << " " << minPointj << endl;
+        
+            for(int i=-2; i < 2; i++){
+                for(int j = -2; j<2; j++){
+                    if(array[minPointj + j][minPointi + i] == 2){
+                        array[minPointj + j][minPointi + i] = 5;
+                    }
+                }
+            }
+    
+}
+
 void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
     //stuff goes here
     
@@ -569,7 +588,12 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
 		}
 		
 		cout << "number of edge cells " << edgeNum << endl;
-    //the location of each food source
+		
+		
+    //a vector of the co-ords of each minimum distance edge point
+    //for each food source.
+    
+    //vector<vector <int> > minDist; 
 
       do{
         //cycles through food sources one-by one to test against edge cells
@@ -607,8 +631,26 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
          // print result:
         cout << "min is " << *distPointer.first << endl;
         cout << ", at position " << (distPointer.first-distVector.begin()) << endl;
+            
+        int point = (distPointer.first-distVector.begin());
+        
+        vector <int> pointCoords;
+        
+        int pointCoordi = edgeVector[point][0];
+        int pointCoordj = edgeVector[point][1];
+        
+        //creates a vector of co-ordinates    
+        pointCoords.push_back(pointCoordi);
+        pointCoords.push_back(pointCoordj);
         
         
+        cout << endl << "co-ords of points are " << pointCoordi << " "<< pointCoordj << endl; 
+        cout << "corresponding food co-ords are " << foodLoci << " " << foodLocj << endl << endl;
+        
+        
+        markUpEdge(array, pointCoords);
+        
+        print(array);
         
         a = a+1;
         
