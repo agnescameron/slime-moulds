@@ -105,7 +105,7 @@ void markUpEdge(int array[52][102], vector<int> pointCoords){
         int minPointi = pointCoords[0];
         int minPointj = pointCoords[1];
         
-        cout << " min points are " << minPointi << " " << minPointj << endl;
+       // cout << " min points are " << minPointi << " " << minPointj << endl;
         
             for(int i=-2; i < 2; i++){
                 for(int j = -2; j<2; j++){
@@ -124,7 +124,7 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
  int a = 0;
 
     
-  cout << "number of food sources " << food << endl;
+ // cout << "number of food sources " << food << endl;
     //create a vector containing every edge element of the slime
     int edgeNum = 0;
     vector<vector<int> > edgeVector;
@@ -147,7 +147,7 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
 		    }
 		}
 		
-		cout << "number of edge cells " << edgeNum << endl;
+	//	cout << "number of edge cells " << edgeNum << endl;
 		
 		
     //a vector of the co-ords of each minimum distance edge point
@@ -159,7 +159,7 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
         //cycles through food sources one-by one to test against edge cells
         int foodLoci = foodLocator[a][0];
         int foodLocj = foodLocator[a][1];
-        cout << endl << "food coord is " << foodLoci << " " << foodLocj << endl;
+       // cout << endl << "food coord is " << foodLoci << " " << foodLocj << endl;
         
         //fresh initialise distVector each time
         vector<float> distVector; 
@@ -170,11 +170,11 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
                int edgei = edgeVector[b][0];
                int edgej = edgeVector[b][1];
                
-               cout << "edge coord is " << edgei << " " << edgej << endl;
+               //cout << "edge coord is " << edgei << " " << edgej << endl;
                
                double dist = sqrt((double)((edgei - foodLoci)*(edgei - foodLoci) + (edgej - foodLocj)*(edgej - foodLocj)));
 
-               cout << "distance  " << dist << endl;
+               //cout << "distance  " << dist << endl;
                distVector.push_back (dist);
                b = b+1;
            }while(b < edgeNum);
@@ -188,9 +188,9 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
         
         auto distPointer = minmax_element (distVector.begin(),distVector.end());
 
-         // print result:
-        cout << "min is " << *distPointer.first << endl;
-        cout << ", at position " << (distPointer.first-distVector.begin()) << endl;
+        //print result:
+        //cout << "min is " << *distPointer.first << endl;
+        //cout << ", at position " << (distPointer.first-distVector.begin()) << endl;
             
         int point = (distPointer.first-distVector.begin());
         
@@ -204,8 +204,8 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
         pointCoords.push_back(pointCoordj);
         
         
-        cout << endl << "co-ords of points are " << pointCoordi << " "<< pointCoordj << endl; 
-        cout << "corresponding food co-ords are " << foodLoci << " " << foodLocj << endl << endl;
+        //cout << endl << "co-ords of points are " << pointCoordi << " "<< pointCoordj << endl; 
+        //cout << "corresponding food co-ords are " << foodLoci << " " << foodLocj << endl << endl;
         
         
         markUpEdge(array, pointCoords);
@@ -221,14 +221,12 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
 void checkOnEdge(int array[52][102], int s, int bubblei, int bubblej, bool &isOnEdge){
 //checks each surrounding square in turn, incrementing t each time one is found to be empty
 //if the number of empty cells, t, is greater than or equal to s, the cell is on the edge
-    
-    cout << "checking edge" << endl;
-    
     int t = 0;
     
     //top
     if(array[bubblej + 1][bubblei] == 0)
-    {   cout << "top bubble empty" << endl;
+    {  
+        // cout << "top bubble empty" << endl;
         t=t+1;
         
     }
@@ -237,7 +235,8 @@ void checkOnEdge(int array[52][102], int s, int bubblei, int bubblej, bool &isOn
     
     //right
     if(array[bubblej][bubblei + 1] == 0)
-       { cout << "right bubble empty" << endl;
+       { 
+        //cout << "right bubble empty" << endl;
         t=t+1;
            
        }
@@ -247,13 +246,15 @@ void checkOnEdge(int array[52][102], int s, int bubblei, int bubblej, bool &isOn
     //below
     if(array[bubblej - 1][bubblei] == 0)
        { t=t+1;
-       cout << "bottom bubble empty" << endl;}
-    else
+      // cout << "bottom bubble empty" << endl;
+      }
+       else
         t=t;    
 
     //left
     if(array[bubblej][bubblei - 1] == 0)
-        {  cout << "left bubble empty" << endl;
+        {  
+        //cout << "left bubble empty" << endl;
             t=t+1;}
     else
         t=t; 
@@ -262,12 +263,12 @@ void checkOnEdge(int array[52][102], int s, int bubblei, int bubblej, bool &isOn
 
     if(t < s)
        { isOnEdge = 0;
-         cout << "t = " << t << "Not on Edge " << isOnEdge << endl;
+         //cout << "t = " << t << "Not on Edge " << isOnEdge << endl;
            
        }
     else   
       { isOnEdge = 1; 
-       cout << "t = " << t << " On Edge " << isOnEdge << endl;
+        //cout << "t = " << t << " On Edge " << isOnEdge << endl;
           
       }
 }
@@ -276,24 +277,24 @@ void checkOnEdge(int array[52][102], int s, int bubblei, int bubblej, bool &isOn
 void checkTrapped(int array[52][102], int bubblei, int bubblej, bool &isTrapped){
 //checks each surrounding square in turn, incrementing t each time one is found to be empty
 //if the number of empty cells, t, is greater than or equal to s, the cell is on the edge
-    cout << "checking trapped" << endl;
+  //  cout << "checking trapped" << endl;
     
     int t = 0;
     
-    cout << "j+1 " << array[bubblej + 1][bubblei] << "   i+1 " << array[bubblej][bubblei + 1] << "   j-1 " << array[bubblej - 1][bubblei] << "   i-1 " << array[bubblej][bubblei - 1] << endl;
+   // cout << "j+1 " << array[bubblej + 1][bubblei] << "   i+1 " << array[bubblej][bubblei + 1] << "   j-1 " << array[bubblej - 1][bubblei] << "   i-1 " << array[bubblej][bubblei - 1] << endl;
     
     //top
     if(array[bubblej + 1][bubblei] != 1  && array[bubblej][bubblei + 1] != 1 && array[bubblej - 1][bubblei] != 1 && array[bubblej][bubblei - 1] != 1)
          { 
          isTrapped = true;
-         cout << " trapped " << isTrapped << endl;
+       //  cout << " trapped " << isTrapped << endl;
              
          }
          
     else   
        { 
         isTrapped = false; 
-        cout << "not trapped " << isTrapped << endl;
+      //  cout << "not trapped " << isTrapped << endl;
            
        }
 
@@ -351,7 +352,7 @@ void chooseCell (int array[52][102], int food, int &outerCelli, int &outerCellj,
       //finds the areas of edge closest to food sources
       
       foodZones(array, food, foodLocator);
-      cout << "got after foodZones " << endl;
+     // cout << "got after foodZones " << endl;
        do{
         int rani = rand() %102;
         int ranj = rand() %52;
@@ -433,7 +434,7 @@ void chooseNextBubble(int array[52][102], int &bubblei, int &bubblej, int &bubbl
 
     if(array[bubblej + 1][bubblei] != 1  && array[bubblej][bubblei + 1] != 1 && array[bubblej - 1][bubblei] != 1 && array[bubblej][bubblei - 1] !=1)
          { 
-         cout << "actually trapped, no choice " << endl;
+         //cout << "actually trapped, no choice " << endl;
              
          }
   do{
@@ -495,6 +496,161 @@ void chooseNextBubble(int array[52][102], int &bubblei, int &bubblej, int &bubbl
      
  }
  
+ 
+void chooseFoodEntry(int array[52][102], int foodi, int foodj, int &foodNexti, int &foodNextj, bool &canEnter){
+    //chooses the entry cell for the food source
+    bool chosenEntry = false;
+    
+    do{
+        if(array[foodj + 1][foodi] == 1 || array[foodj][foodi +1] == 1 || array[foodj - 1][foodi] == 1 || array[foodj][foodi-1] == 1){
+               
+               cout << "can enter " << foodi << " " << foodj << endl;
+               canEnter = true;
+               int ranChoice = rand() %4;
+
+                //tests cell above  
+                if (ranChoice == 0){
+                    if(array[foodj + 1][foodi] == 1){
+                         foodNexti = foodi;
+                         foodNextj = foodj + 1;
+                         chosenEntry = true;
+                    }
+                }    
+      
+                //tests cell right  
+                else if (ranChoice == 1){
+                  if(array[foodj][foodi +1] == 1){
+                         foodNexti = foodi + 1;
+                         foodNextj = foodj;
+                         chosenEntry = true;
+                    }
+                }
+                
+      
+                //tests cell below
+                else if (ranChoice == 2){
+                  if(array[foodj - 1][foodi] == 1){
+                         foodNexti = foodi;
+                         foodNextj = foodj - 1;
+                         chosenEntry = true;
+                    }
+                }
+                     
+                //tests cell left
+                else{
+                  if(array[foodj][foodi-1] == 1){
+                         foodNexti = foodi - 1;
+                         foodNextj = foodj;
+                         chosenEntry = true;
+                    }
+                }
+        }
+        
+        else{
+            
+            cout << "can't enter " << foodi << " " << foodj << endl;
+            canEnter = false;
+            chosenEntry = true;
+        }
+        
+    }while(chosenEntry == false);
+} 
+
+void pickEdge(int array[52][102], int foodi, int foodj){
+    
+    bool chosenEdge = false;
+    int ranChoice = rand() %4;
+
+//tests cell above  
+    if (ranChoice == 0){
+      if(array[foodj + 1][foodi] == 0){
+         array[foodj + 1][foodi] = 6;
+         chosenEdge = true;
+      }
+    }
+      
+//tests cell right  
+    else if (ranChoice == 0){
+      if(array[bubblej][bubblei +1] == 0){
+         array[bubblej][bubblei +1] = 6;
+         chosenEdge = true;
+      }
+    }     
+      
+//tests cell below
+    else if (ranChoice == 2){
+      if(array[bubblej - 1][bubblei] == 0){
+         array[bubblej - 1][bubblei] = 6;
+         chosenEdge = true;
+      }
+    }
+      
+//tests cell left
+    else if (ranChoice == 3) {
+      if(array[bubblej][bubblei - 1] == 0){
+      array[bubblej - 1][bubblei] = 6;
+         chosenEdge = true;
+      }
+    }
+}
+ 
+void foodPath(int array[52][102], int food, vector<vector<int> > foodLocator)
+{
+    int a = 0;
+    int path = 0;
+    bool canEnter = true;
+    bool isOnEdge = false;
+    bool chosenFoodPath = false;
+    bool isTrapped = false;
+    
+    //this function models the growth of the slime with the addition of a food source
+    do{
+        int foodi = foodLocator[a][0];
+        int foodj = foodLocator[a][1];
+        int foodNexti;
+        int foodNextj;
+        
+        chooseFoodEntry(array, foodi, foodj, foodNexti, foodNextj, canEnter);
+        
+        if(canEnter == true){
+            do{
+                countSize(array);
+                cout << "entering in foodPath" << endl;
+                
+                   checkOnEdge(array, 2, foodi, foodj, isOnEdge);
+                        if(isOnEdge == true){
+                            pickEdge(array, foodi, foodj);
+                            break;
+                        }
+      
+                   
+                  checkTrapped(array, foodi, foodj, isTrapped);
+                        if(isTrapped == true){
+                            break;
+                        }
+                
+                chooseNextBubble(array, foodi, foodj, foodNexti, foodNextj, chosenFoodPath);
+                
+                array[foodNextj][foodNexti] = 6;
+                
+                foodi = foodNexti;
+                foodj = foodNextj;
+                
+                print(array);
+                system("sleep 0.05");
+                
+                path = path+1;
+                
+            }while(path < 100);
+            
+           array[foodj][foodi] = 6;
+        }
+        
+        a = a+1;
+        
+    }while(a < food);
+    
+}
 
 void migration(int array[52][102], int s, int n, int food, char printBubble, vector<vector<int> > foodLocator)
 {
@@ -520,16 +676,7 @@ void migration(int array[52][102], int s, int n, int food, char printBubble, vec
   chooseCell(array, food, outerCelli, outerCellj, entryCelli, entryCellj, foodLocator);
 
  	//the bubble enters the slime
- 	
- 	//test code 
-//  	temp1[entryCellj][entryCelli] = 5;
-//     temp1[outerCellj][outerCelli] = 6;
-//     cout << "entry cell is " << 	temp1[entryCellj][entryCelli] << entryCelli << entryCellj << endl;
-//     cout << "outer cell is " << temp1[outerCellj][outerCelli] << outerCelli << outerCellj << endl;
-    
      print(temp1);
-    
-//     system("sleep 0.2");
 
  	temp1[entryCellj][entryCelli] = 0;
     temp1[outerCellj][outerCelli] = 2;
@@ -614,6 +761,9 @@ void migration(int array[52][102], int s, int n, int food, char printBubble, vec
       
    }while(k<n);
   
+  
+   foodPath(temp1, food, foodLocator);
+  
 
   //re-draws the boundaries of the slime according to the new configuration
 	for(int j = 1; j < 51; j++)
@@ -632,6 +782,10 @@ void migration(int array[52][102], int s, int n, int food, char printBubble, vec
 		    
 		    else if(temp1[j][i] == 4){
 		        temp1[j][i] = 4;
+		    }
+		    
+		    else if(temp1[j][i] == 6){
+		        temp1[j][i] = 1;
 		    }
 		    
 		     else if(temp1[j][i] == 5){
@@ -659,7 +813,7 @@ void checkFood(int array[52][102]){
 		}
 		
  	}
- 	cout << "food sources" << foodNum;
+ 	//cout << "food sources" << foodNum;
 }
 
 
@@ -674,7 +828,7 @@ void checkSeeds(int array[52][102]){
 		}
 		
  	}
- 	cout << "number of seed cells " << seedNum;
+ 	//cout << "number of seed cells " << seedNum;
 }
 
 int main()
@@ -690,7 +844,8 @@ int main()
 	char printBubble;
 	int n = -1;
 	int limit = -1;
-	int steps;
+	int steps = 0;
+	int stepsprev = 0;
 	char again;
     char cont;
     char migrate;
@@ -767,8 +922,8 @@ int main()
         
         if(food != 0){
          do{
-            int ranFoodi = rand() %101;
-            int ranFoodj = rand() %51;
+            int ranFoodi = 1 + rand() %101;
+            int ranFoodj = 1 + rand() %51;
         
               if(gen0[ranFoodj][ranFoodi] == 1 || gen0[ranFoodj][ranFoodi] == 4){
                         }
@@ -789,7 +944,7 @@ int main()
                     foodLocator.push_back(coord);
                     
                     // cout << "a is " << a << endl;
-                    cout << "vector coords " << foodLocator[a][0] << " " << foodLocator[a][1] << endl;
+                    //cout << "vector coords " << foodLocator[a][0] << " " << foodLocator[a][1] << endl;
                     // cout << "vector size " << coord.size() << endl <<endl;
                     a = a+1;
              }         
@@ -862,7 +1017,7 @@ int main()
   do{  
    do {
 
-        cout << "#################" << endl << "Time = " << steps + m; 
+        cout << "#################" << endl << "Time = " << steps + m + stepsprev; 
 			     //<< ":" << endl << decoration << endl << endl;
        
        if(repeat == true){
@@ -877,7 +1032,7 @@ int main()
        migration(todo, s, n, food, printBubble, foodLocator);
        cout << "printing" << endl;
        print(todo);
-       system("sleep .2");
+       system("sleep .05");
        cout << endl;
        
        i++;
@@ -900,6 +1055,7 @@ int main()
     {
       cout << "Run another simulation? (y/n): ";
 	  cin >> again;
+	  stepsprev = m;
 	        
     }while(again != 'y' && again != 'n');
     
