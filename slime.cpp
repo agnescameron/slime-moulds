@@ -769,7 +769,7 @@ int main()
 
 	        do{ 
                 
-                cout <<endl<< "How many steps for the initial growth phase, m (typically 8, must be >0) ";
+                cout <<endl<< "How many steps for the initial growth phase, m (typically 4, must be >0) ";
 		        cin >> m;
 		        
 	        if (cin.fail())
