@@ -9,11 +9,16 @@ To use the code, compile and run the file slime.cpp in c++0x. The program invite
 
 GROWTH:
 Initial seed size: the number of cells that form the initial seed of the slime (spread randonly around an initial point)
+
 Number of food sources: how many randomly-distributed food sources are distributed. By typing zero, the slime will perform amoebic, rather than chemotactic motion.
+
 Steps for initial growth phase: expands the slime around the initial seed
 
 MIGRATION
 s: This is the number of empty cells that must surround a bubble that has entered the slime (NSEW, there are no diagonal cells), for that bubble to be considered 'on the edge' of the slime, and therefore expelled
+
 Number of Cells a Bubble Can Move: limits bubble flow after a set number of steps. The smaller this is, the more fragmented the plasmodium becomes.
+
 Limit for cycles: Number of iterations of 'accepting a bubble'. This can be extended after the program has run.
+
 Print the bubble: Useful for getting a feel for the mechanism of how the algorithm works, but makes code distinctly slower.
