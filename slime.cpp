@@ -1,4 +1,11 @@
-//A basic model of amoebic behaviour in physarum polycephalum
+//A basic model of amoebic behaviour in physarum polycephalum, based on that
+//proposed by Gunji et. al. Simulation prints 'slime graphic' to termial. The
+//Gunji model is developed by introducing random distributions of food, as
+//opposed to the original model, which dictates a particular morphology of
+//places where empty cells can and cannot enter the slime, and therefore particular
+//patterns of migration
+
+//Agnes Cameron, 2017
 
 #include <iostream>
 #include <string>
@@ -9,14 +16,17 @@
 #include <math.h>
 #include <vector>
 #include <ctime>
+#include <ctype.h>
+#include <sstream>
 
 using namespace std;
 
 
 //This function prints the 50 x 100 part of the array. Spaces represent empty cells,
 // + symbols interior cells, * symbols boundary cells
-void print(int array[52][102])
+void print(int array[52][102], int simsteps)
 {
+ cout << "#################" << endl << "Time = " << simsteps << endl;
  for(int j = 1; j < 51; j++)
    {
     for(int i = 1; i < 101; i++) 			
@@ -40,6 +50,7 @@ void print(int array[52][102])
 		}
 		cout << endl;
  	}
+ 	cout << endl << endl;
 }
 
 //Copies one array to another.
@@ -101,11 +112,10 @@ void growth(int array[52][102], int m)
 void markUpEdge(int array[52][102], vector<int> pointCoords){
     // this function takes the minimum distances between food sources and edge cells
     //and marks up possible bubble entrance points. The mechanism for this is to allow
-    //entrance from bubbles within a 5x5 square (eg +- 2).
+    //entrance from bubbles within a 5x5 square (eg +- 2). This mimics the chemotactic motion of the slime
         int minPointi = pointCoords[0];
         int minPointj = pointCoords[1];
-        
-       // cout << " min points are " << minPointi << " " << minPointj << endl;
+
         
             for(int i=-2; i < 2; i++){
                 for(int j = -2; j<2; j++){
@@ -123,9 +133,7 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
     
  int a = 0;
 
-    
- // cout << "number of food sources " << food << endl;
-    //create a vector containing every edge element of the slime
+    //create a vector containing every edge element (cell type 2) of the slime
     int edgeNum = 0;
     vector<vector<int> > edgeVector;
     
@@ -146,22 +154,13 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
 	        	}
 		    }
 		}
-		
-	//	cout << "number of edge cells " << edgeNum << endl;
-		
-		
-    //a vector of the co-ords of each minimum distance edge point
-    //for each food source.
-    
-    //vector<vector <int> > minDist; 
 
       do{
         //cycles through food sources one-by one to test against edge cells
         int foodLoci = foodLocator[a][0];
         int foodLocj = foodLocator[a][1];
-       // cout << endl << "food coord is " << foodLoci << " " << foodLocj << endl;
         
-        //fresh initialise distVector each time
+        //fresh initialise distVector (distance between edge cell and food source) each time
         vector<float> distVector; 
         
         int b = 0;
@@ -170,7 +169,6 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
                int edgei = edgeVector[b][0];
                int edgej = edgeVector[b][1];
                
-               //cout << "edge coord is " << edgei << " " << edgej << endl;
                
                double dist = sqrt((double)((edgei - foodLoci)*(edgei - foodLoci) + (edgej - foodLocj)*(edgej - foodLocj)));
 
@@ -179,23 +177,14 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
                b = b+1;
            }while(b < edgeNum);
         
-        //scan the vector of distances to obtain the minimum distance co-ordinate for 
-        //that food source. Store in vector of minimum distance co-ords
-        
-        // int x = *min_element(distVector.begin(), distVector.end() );
-        // cout << "min element is " <<  x  << endl << endl;
-        
-        
+        //scan the vector of distances to obtain the minimum distance co-ordinate for
+        //that food source. Store in vector of minimum distance co-ordinates
         auto distPointer = minmax_element (distVector.begin(),distVector.end());
-
-        //print result:
-        //cout << "min is " << *distPointer.first << endl;
-        //cout << ", at position " << (distPointer.first-distVector.begin()) << endl;
-            
         int point = (distPointer.first-distVector.begin());
         
         vector <int> pointCoords;
         
+        //stores minimum distance points
         int pointCoordi = edgeVector[point][0];
         int pointCoordj = edgeVector[point][1];
         
@@ -203,74 +192,52 @@ void foodZones(int array[52][102], int food, vector<vector<int> > foodLocator){
         pointCoords.push_back(pointCoordi);
         pointCoords.push_back(pointCoordj);
         
-        
-        //cout << endl << "co-ords of points are " << pointCoordi << " "<< pointCoordj << endl; 
-        //cout << "corresponding food co-ords are " << foodLoci << " " << foodLocj << endl << endl;
-        
-        
+        //marks the edge with type-5 cells to show clearly the potential points
+        //of entry for bubbles into the plasmodium. 
         markUpEdge(array, pointCoords);
-        
-        print(array);
         
         a = a+1;
         
   	}while(a < food);
 }
 
-//checks if the bubble is on the edge of the slime
+//checks if a cell is on the edge of the slime
 void checkOnEdge(int array[52][102], int s, int bubblei, int bubblej, bool &isOnEdge){
+//for a bubble which has entered the plasmodium, checks whether it has reached the edge
 //checks each surrounding square in turn, incrementing t each time one is found to be empty
 //if the number of empty cells, t, is greater than or equal to s, the cell is on the edge
     int t = 0;
     
     //top
     if(array[bubblej + 1][bubblei] == 0)
-    {  
-        // cout << "top bubble empty" << endl;
         t=t+1;
-        
-    }
     else
         t=t;
     
     //right
     if(array[bubblej][bubblei + 1] == 0)
-       { 
-        //cout << "right bubble empty" << endl;
         t=t+1;
-           
-       }
     else
         t=t;    
 
     //below
     if(array[bubblej - 1][bubblei] == 0)
-       { t=t+1;
-      // cout << "bottom bubble empty" << endl;
-      }
-       else
+        t=t+1;
+    else
         t=t;    
 
     //left
     if(array[bubblej][bubblei - 1] == 0)
-        {  
-        //cout << "left bubble empty" << endl;
-            t=t+1;}
+        t=t+1;
     else
         t=t; 
-        
-    //check
 
     if(t < s)
-       { isOnEdge = 0;
-         //cout << "t = " << t << "Not on Edge " << isOnEdge << endl;
-           
-       }
+       isOnEdge = 0;
+       
     else   
-      { isOnEdge = 1; 
-        //cout << "t = " << t << " On Edge " << isOnEdge << endl;
-          
-      }
+       isOnEdge = 1; 
+      
 }
 
 //checks if the bubble has become trapped (memorised flow)
@@ -280,47 +247,39 @@ void checkTrapped(int array[52][102], int bubblei, int bubblej, bool &isTrapped)
   //  cout << "checking trapped" << endl;
     
     int t = 0;
-    
-   // cout << "j+1 " << array[bubblej + 1][bubblei] << "   i+1 " << array[bubblej][bubblei + 1] << "   j-1 " << array[bubblej - 1][bubblei] << "   i-1 " << array[bubblej][bubblei - 1] << endl;
-    
+
     //top
     if(array[bubblej + 1][bubblei] != 1  && array[bubblej][bubblei + 1] != 1 && array[bubblej - 1][bubblei] != 1 && array[bubblej][bubblei - 1] != 1)
-         { 
          isTrapped = true;
-       //  cout << " trapped " << isTrapped << endl;
-             
-         }
-         
+
     else   
-       { 
         isTrapped = false; 
-      //  cout << "not trapped " << isTrapped << endl;
-           
-       }
 
 }
 
 //calculates the size of the slime
 void countSize(int array[52][102]){
-    //counts the size of the slime
     
     int slimeSize = 0;
- for(int j = 1; j < 51; j++)
-   {
-    for(int i = 1; i < 101; i++) 			
-	{
-		    if(array[j][i] == 1 || array[j][i] == 2)
+     for(int j = 1; j < 51; j++)
+       {
+        for(int i = 1; i < 101; i++) 			
+    	{
+		    if(array[j][i] == 1 || array[j][i] == 2 || array[j][i] == 3 || array[j][i] == 6)
                 {slimeSize = slimeSize + 1;}
-		}
-		
- 	}
+    		}
+    		
+     	}
  	cout << "seed size " << slimeSize;
 }
 
-//chooses the entrance point to the slime
+//chooses the entrance point to the slime for an empty cell
 void chooseCell (int array[52][102], int food, int &outerCelli, int &outerCellj, int &entryCelli, int &entryCellj, vector<vector<int> > foodLocator){
-  //choose a boundary (type 2) cell to become the point of entry.
+  //chooses a boundary (type 2) cell to become the point of entry
   //Randomly selects an adjacent empty cell to be the 'bubble'
+  //if there are no food sources, choice is random
+  //otherwise, the point of entry is determined by the 
+  //position of the food source
   
   bool chosenCell = false;
   bool chosenBubble = false;
@@ -432,11 +391,6 @@ void chooseCell (int array[52][102], int food, int &outerCelli, int &outerCellj,
 void chooseNextBubble(int array[52][102], int &bubblei, int &bubblej, int &bubbleNexti, int &bubbleNextj, bool chosenNextBubble)
  { 
 
-    if(array[bubblej + 1][bubblei] != 1  && array[bubblej][bubblei + 1] != 1 && array[bubblej - 1][bubblei] != 1 && array[bubblej][bubblei - 1] !=1)
-         { 
-         //cout << "actually trapped, no choice " << endl;
-             
-         }
   do{
 
     int ranChoice = rand() %4;
@@ -486,173 +440,13 @@ void chooseNextBubble(int array[52][102], int &bubblei, int &bubblej, int &bubbl
       else
          chosenNextBubble = false;
       }
-     
-    
-    
-    // checkTrapped(array[52][102], bubblei, bubblej, isTrapped);
-    // checkOnEdge(temp1, s, bubblei, bubblej, isOnEdge);
-    
+      
     }while(chosenNextBubble == false);
      
  }
- 
- 
-void chooseFoodEntry(int array[52][102], int foodi, int foodj, int &foodNexti, int &foodNextj, bool &canEnter){
-    //chooses the entry cell for the food source
-    bool chosenEntry = false;
-    
-    do{
-        if(array[foodj + 1][foodi] == 1 || array[foodj][foodi +1] == 1 || array[foodj - 1][foodi] == 1 || array[foodj][foodi-1] == 1){
-               
-               cout << "can enter " << foodi << " " << foodj << endl;
-               canEnter = true;
-               int ranChoice = rand() %4;
 
-                //tests cell above  
-                if (ranChoice == 0){
-                    if(array[foodj + 1][foodi] == 1){
-                         foodNexti = foodi;
-                         foodNextj = foodj + 1;
-                         chosenEntry = true;
-                    }
-                }    
-      
-                //tests cell right  
-                else if (ranChoice == 1){
-                  if(array[foodj][foodi +1] == 1){
-                         foodNexti = foodi + 1;
-                         foodNextj = foodj;
-                         chosenEntry = true;
-                    }
-                }
-                
-      
-                //tests cell below
-                else if (ranChoice == 2){
-                  if(array[foodj - 1][foodi] == 1){
-                         foodNexti = foodi;
-                         foodNextj = foodj - 1;
-                         chosenEntry = true;
-                    }
-                }
-                     
-                //tests cell left
-                else{
-                  if(array[foodj][foodi-1] == 1){
-                         foodNexti = foodi - 1;
-                         foodNextj = foodj;
-                         chosenEntry = true;
-                    }
-                }
-        }
-        
-        else{
-            
-            cout << "can't enter " << foodi << " " << foodj << endl;
-            canEnter = false;
-            chosenEntry = true;
-        }
-        
-    }while(chosenEntry == false);
-} 
 
-void pickEdge(int array[52][102], int foodi, int foodj){
-    
-    bool chosenEdge = false;
-    int ranChoice = rand() %4;
-
-//tests cell above  
-    if (ranChoice == 0){
-      if(array[foodj + 1][foodi] == 0){
-         array[foodj + 1][foodi] = 6;
-         chosenEdge = true;
-      }
-    }
-      
-//tests cell right  
-    else if (ranChoice == 0){
-      if(array[bubblej][bubblei +1] == 0){
-         array[bubblej][bubblei +1] = 6;
-         chosenEdge = true;
-      }
-    }     
-      
-//tests cell below
-    else if (ranChoice == 2){
-      if(array[bubblej - 1][bubblei] == 0){
-         array[bubblej - 1][bubblei] = 6;
-         chosenEdge = true;
-      }
-    }
-      
-//tests cell left
-    else if (ranChoice == 3) {
-      if(array[bubblej][bubblei - 1] == 0){
-      array[bubblej - 1][bubblei] = 6;
-         chosenEdge = true;
-      }
-    }
-}
- 
-void foodPath(int array[52][102], int food, vector<vector<int> > foodLocator)
-{
-    int a = 0;
-    int path = 0;
-    bool canEnter = true;
-    bool isOnEdge = false;
-    bool chosenFoodPath = false;
-    bool isTrapped = false;
-    
-    //this function models the growth of the slime with the addition of a food source
-    do{
-        int foodi = foodLocator[a][0];
-        int foodj = foodLocator[a][1];
-        int foodNexti;
-        int foodNextj;
-        
-        chooseFoodEntry(array, foodi, foodj, foodNexti, foodNextj, canEnter);
-        
-        if(canEnter == true){
-            do{
-                countSize(array);
-                cout << "entering in foodPath" << endl;
-                
-                   checkOnEdge(array, 2, foodi, foodj, isOnEdge);
-                        if(isOnEdge == true){
-                            pickEdge(array, foodi, foodj);
-                            break;
-                        }
-      
-                   
-                  checkTrapped(array, foodi, foodj, isTrapped);
-                        if(isTrapped == true){
-                            break;
-                        }
-                
-                chooseNextBubble(array, foodi, foodj, foodNexti, foodNextj, chosenFoodPath);
-                
-                array[foodNextj][foodNexti] = 6;
-                
-                foodi = foodNexti;
-                foodj = foodNextj;
-                
-                print(array);
-                system("sleep 0.05");
-                
-                path = path+1;
-                
-            }while(path < 100);
-            
-           array[foodj][foodi] = 6;
-        }
-        
-        a = a+1;
-        
-    }while(a < food);
-    
-}
-
-void migration(int array[52][102], int s, int n, int food, char printBubble, vector<vector<int> > foodLocator)
+void migration(int array[52][102], int s, int n, int food, char printBubble, vector<vector<int> > foodLocator, int simsteps)
 {
 //This is the migratory phase of slime simulation. During this phase, the slime no longer
 //expands, and instead re-forms itself by randomly absorbing surrounding empty cells 
@@ -676,8 +470,6 @@ void migration(int array[52][102], int s, int n, int food, char printBubble, vec
   chooseCell(array, food, outerCelli, outerCellj, entryCelli, entryCellj, foodLocator);
 
  	//the bubble enters the slime
-     print(temp1);
-
  	temp1[entryCellj][entryCelli] = 0;
     temp1[outerCellj][outerCelli] = 2;
     
@@ -746,12 +538,13 @@ void migration(int array[52][102], int s, int n, int food, char printBubble, vec
      
       k = k+1;
       
-      countSize(temp1);
+      //checking step
+      //countSize(temp1);
       
     if(printBubble == 'y'){
      //prints the path of the bubble through the plasmoid, for reference 
       copy(temp1, plasmoid);
-      print(plasmoid);
+      print(plasmoid, simsteps);
       system("sleep 0.05");
       
    }
@@ -760,10 +553,6 @@ void migration(int array[52][102], int s, int n, int food, char printBubble, vec
       bubblej = bubbleNextj;
       
    }while(k<n);
-  
-  
-   foodPath(temp1, food, foodLocator);
-  
 
   //re-draws the boundaries of the slime according to the new configuration
 	for(int j = 1; j < 51; j++)
@@ -801,7 +590,7 @@ void migration(int array[52][102], int s, int n, int food, char printBubble, vec
   copy(temp2, array);
 }
 
-
+// checks the number of food sources (debugging)
 void checkFood(int array[52][102]){
     int foodNum = 0;
  for(int j = 1; j < 51; j++)
@@ -813,10 +602,10 @@ void checkFood(int array[52][102]){
 		}
 		
  	}
- 	//cout << "food sources" << foodNum;
+ 	cout << "food sources" << foodNum;
 }
 
-
+// check the number of initial 'seeds'
 void checkSeeds(int array[52][102]){
     int seedNum = 0;
  for(int j = 1; j < 51; j++)
@@ -828,45 +617,46 @@ void checkSeeds(int array[52][102]){
 		}
 		
  	}
- 	//cout << "number of seed cells " << seedNum;
+ 	cout << "number of seed cells " << seedNum;
 }
 
 int main()
 {
 
-	int todo[52][102] = {0};
+	int genNext[52][102] = {0};
 	int backup[52][102] = {0};
-	int m = -1;
-	int s = -1;
-	int a = 0;
-	int food = -1;
-	int seedSize = -1;
+	int m;
+	int s;
+	int food;
+	int seedSize;
 	char printBubble;
-	int n = -1;
-	int limit = -1;
+	int n;
+	int limit;
 	int steps = 0;
 	int stepsprev = 0;
 	char again;
     char cont;
     char migrate;
-    char continu = 'n';
+    char continu = 'y';
     bool comparison;
     bool repeat = false;
+    bool seedSizeChosen = false;
+    bool foodChosen = false;
+    bool mChosen = false;
 	string decoration;
 
   //Instructions 
-	cout << endl << "This program is a C++ implementation of Gunji's " <<endl
-	<< endl << "cellular automata model of slime synthesis" << endl 
+	cout << endl << "This program is a C++ implementation of Gunji's cellular automata model for slime moulds" << endl 
        << endl << "The model consists of 2 phases:" << endl
-       << endl << "1. Growth: a seed is randomly initialised, and the"
-       << endl << "slime grows for m steps (typically m=8)" << endl
-       << endl << "2. Migration phase: the total size of the slime does not increase"
-       << endl << "and instead empty cells are absorbed into the slime and transported through the membrane."
-       << endl << "The empty cell moves through the slime by changing places with random adjacent cells," << endl
+       << endl << "1. Growth: a seed is randomly initialised, and the slime grows for m steps (typically m=8)" << endl
+       << endl << "2. Migration phase: the total size of the slime does not increase and instead empty"
+       << endl << "cells are absorbed into the slime and transported through the membrane."
+       << endl << "The empty cell moves through the slime by changing places with random adjacent cells,"
        << endl << "halting only when the number of adjacent empty cells is greater than or equal to s (typically s=3)"
        << endl << "or when the number of steps the empty cell has made is greater than or equal to n (typically n=6)." 
        << endl << "At this point, the boundaries of the cell are redefined, and the process is repeated"
-       << endl << endl;
+       << endl << "The inclusion of food sources initiates 'chemotactic' behaviour, in which the slime " 
+       << endl << "accepts empty cells preferentially in the direction of food" << endl << endl << endl;
   //Loop to check if user wants to keep simulating.
   do
 	{ 	
@@ -878,13 +668,42 @@ int main()
 		{ 
       cout << "Growth Phase" <<endl<< "What is the size of the initial seed (~60) ";
 		  cin >> seedSize;
-		}while(seedSize == -1);
+		   if (cin.fail())
+                 {
+                 cout << "incorrect input, please enter a numerical value" << endl;
+
+                 // get rid of failure state
+                 cin.clear(); 
+
+                 // discard input
+                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+            
+		  	else{
+		        seedSizeChosen = true;
+		  	}
+		}while(seedSizeChosen == false);
    
        
        do{
-           cout << "How many food sources?" << endl;
+           //user inputs food sources
+           cout << "How many food sources? ";
            cin >> food;
-       }while(food == -1);
+            if (cin.fail())
+                 {
+                 cout << "incorrect input, please enter a numerical value" << endl;
+
+                 // get rid of failure state
+                 cin.clear(); 
+
+                 // discard input
+                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+            
+		  	else{
+		        foodChosen = true;
+		  	}
+       }while(foodChosen == false);
        	
 		
     //Clears the screen so the program can start fresh.
@@ -912,18 +731,15 @@ int main()
             }
           }while(n <= seedSize);  
           
-          print(gen0);
+          print(gen0, i);
           
-          //checkSeeds(gen0);
-          
-    //Picks food sources
-      
-      vector<vector<int> > foodLocator;
-        
+    //Picks food sources    
+      vector<vector<int> > foodLocator(0);
+      	int a = 0;  
         if(food != 0){
          do{
-            int ranFoodi = 1 + rand() %101;
-            int ranFoodj = 1 + rand() %51;
+            int ranFoodi = 1 + rand() %100;
+            int ranFoodj = 1 + rand() %50;
         
               if(gen0[ranFoodj][ranFoodi] == 1 || gen0[ranFoodj][ranFoodi] == 4){
                         }
@@ -935,17 +751,8 @@ int main()
                     coord.push_back(ranFoodi);
                     coord.push_back(ranFoodj);
                     
-                    
-                    ////tests co-ordinate values
-                    // cout << "coords " << ranFoodi << " " << ranFoodj << endl; 
-                    // cout << "coords " << coord.at( 0 )  << " " << coord.at( 1 ) << endl; 
-                    // cout << "coords size " << coord.size() << endl;
-                    
+                    //writes the location of each food source to a vector
                     foodLocator.push_back(coord);
-                    
-                    // cout << "a is " << a << endl;
-                    //cout << "vector coords " << foodLocator[a][0] << " " << foodLocator[a][1] << endl;
-                    // cout << "vector size " << coord.size() << endl <<endl;
                     a = a+1;
              }         
          }while(a < food);
@@ -953,30 +760,43 @@ int main()
                 
         }        
           
-                
-			cout << "#################" << endl << "Time = " << i 
-			     << ":" << endl << decoration << endl << endl;
-			  copy(gen0, todo); 
-			  copy(todo, backup);			
-		      print(todo); 
+            //records the stage in the growth    
+			//cout << "#################" << endl << "Time = " << i 
+			//     << ":" << endl << decoration << endl << endl;
+			  copy(gen0, genNext); 
+			  copy (genNext, backup);			
+		      print (genNext, i); 
 
 	        do{ 
                 
                 cout <<endl<< "How many steps for the initial growth phase, m (typically 8, must be >0) ";
 		        cin >> m;
-	            
-	         }while(m == -1);
+		        
+	        if (cin.fail())
+                 {
+                 cout << "incorrect input, please enter a numerical value" << endl;
+
+                 // get rid of failure state
+                 cin.clear(); 
+
+                 // discard input
+                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+            
+		  	else{
+		        mChosen = true;
+		        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		  	}
+	         }while(mChosen == false);
 			     
 	    do{	
 
-	     cout << "#################" << endl << "Time = " << i ;  
-      //Initializes the arrays by copying the gen0 array to the todo array.
-    //   if(i == 0){
-		  //     copy(gen0, todo); 
-    //   }
-		  copy(todo, backup);			
-		  print(todo);
-		  growth(todo, m);
+	     cout << "#################" << endl << "Time = " << i  << endl;  
+      //Initializes the arrays by copying the gen0 array to the genNext array.
+
+		  copy (genNext, backup);			
+		  print (genNext, i);
+		  growth (genNext, m);
 		  i++;
 		  
       //Pauses the system for 1/2 a second in order to give the screen
@@ -985,53 +805,132 @@ int main()
 
         cout << endl;
 		}while(i < m); 
-    //Loop to check for proper inputs.
-    
+
     //Label the food zones according to the positions of the slime edges
-        foodZones(todo, food, foodLocator); 
+        foodZones (genNext, food, foodLocator); 
                 
-    
-    
-      cout << "Migration Phase" << endl << endl;
+    //the phase in which the slime migrates towards food sources
+     cout << "Migration Phase" << endl << endl;
+     bool printBubbleChosen = false;
+     bool nChosen = false;
+     bool sChosen = false;
+     bool limitChosen = false;
+     bool againChosen = false;
+     bool continuChosen = false;
+     int simsteps = 0;  
        
        do{
           cout << "Choose a value for s (the number of empty neighbouring cells required for an"<<endl <<"empty cell to be rejected from the slime, typically 3)?: ";
 		  cin >> s;
-         }while(s == -1);
+		  
+		   if (cin.fail())
+                 {
+                 cout << "incorrect input, please enter a numerical value" << endl;
+
+                 // get rid of failure state
+                 cin.clear(); 
+
+                 // discard input
+                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+            
+		  	else{
+		        sChosen = true;
+		        //cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+		  	}
+         }while(sChosen == false);
          
            do{
-          cout << "Choose a maximum value for the number of cells a bubble moves before stopping"<<endl <<"(typically 20)?: ";
+          cout << "Choose a maximum value for the number of cells a bubble moves before stopping"<<endl <<"(typically 1000)?: ";
 		  cin >> n;
-         }while(n == -1); 
-         
-           do{
-          cout << "Pick a limit for the number of cycles"<<endl <<"(typically 300)?: ";
-		  cin >> limit;
-         }while(limit == -1); 
+		  
+		   if (cin.fail())
+                 {
+                 cout << "incorrect input, please enter a numerical value" << endl;
+
+                 // get rid of failure state
+                 cin.clear(); 
+
+                 // discard input
+                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+            
+		  	else{
+		        nChosen = true;
+		        //in case user has included decimal, truncates to nearest integer
+		        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		  	}
+         }while(nChosen == false); 
          
          do{
+          cout << "Pick a limit for the number of cycles"<< endl <<"(typically 1500)?: ";
+		  cin >> limit;
+		  
+		   if (cin.fail())
+                 {
+                 cout << "incorrect input, please enter a numerical value" << endl;
+
+                 // get rid of failure state
+                 cin.clear(); 
+
+                 // discard input
+                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+            
+		  	else{
+		        limitChosen = true;
+		        cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+		  	}
+         }while(limitChosen == false); 
+         
+         do{
+        //user decides whether they want to see empty cell migration (for debugging)     
           cout << "Print the path of the bubble through the slime (y/n) ";
 		  cin >> printBubble;
-         }while(printBubble !='y' && printBubble !='n'); 
+		    if(printBubble == 'y' || printBubble == 'n'){
+		        printBubbleChosen = true;
+		       // cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		    }
+		    else{
+		        cout << "incorrect input, please enter y or n " << endl;
+		        //cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+		    }
+         }while(printBubbleChosen == false); 
+         
 
   do{  
    do {
+        simsteps = steps + m + stepsprev;
 
-        cout << "#################" << endl << "Time = " << steps + m + stepsprev; 
-			     //<< ":" << endl << decoration << endl << endl;
-       
        if(repeat == true){
       do{
           steps = 0;
           cout << "How many more cycles? "<<endl;
 		  cin >> limit;
 		  repeat = false;
-         }while(limit == -1); 
+
+		   if (cin.fail())
+                 {
+                 cout << "incorrect input, please enter a numerical value" << endl;
+
+                 // get rid of failure state
+                 cin.clear(); 
+
+                 // discard input
+                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+            
+		  	else{
+		        limitChosen = true;
+		        //cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		  	}
+		  	
+         }while(limitChosen == false); 
+
        }
        
-       migration(todo, s, n, food, printBubble, foodLocator);
-       cout << "printing" << endl;
-       print(todo);
+       migration (genNext, s, n, food, printBubble, foodLocator, simsteps);
+       print (genNext, simsteps);
        system("sleep .05");
        cout << endl;
        
@@ -1042,12 +941,25 @@ int main()
 
         do
             {
+                 //decides whether to continue current simulation
                 cout << "Continue simulation? (y/n): ";
 	            cin >> continu;
-            }while(continu != 'y' && continu != 'n');
+	            
+	            if(continu == 'y' || continu == 'n'){
+		        continuChosen = true;
+		        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		    }
+	            else{
+		        cout << "incorrect value, please enter y or n " << endl;
+		        continuChosen = false;
+		        //cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		    }
+            }while(continuChosen == false);
     
     repeat = true;
-    limit = -1;
+    stepsprev = simsteps - m + 1;
+    steps = 0;
+    limitChosen = false;
 
 	}while(continu == 'y');
 
@@ -1055,14 +967,25 @@ int main()
     {
       cout << "Run another simulation? (y/n): ";
 	  cin >> again;
-	  stepsprev = m;
+	  
+	  //decides whether to run another, separate simulation
+	  if(again == 'y' || again == 'n'){
+		  againChosen = true;
+		  cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		    }
+	  else{
+		  cout << "incorrect value, please enter y or n " << endl;
+		  //cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		    }
+	  
+	  stepsprev = 0;
 	        
-    }while(again != 'y' && again != 'n');
+    }while(againChosen == false);
     
-
+    continu = 'y';
+    repeat = false;
     
 	}while(again == 'y');
 	
-
 	return 0;
 }	
