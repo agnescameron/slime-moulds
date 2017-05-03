@@ -5,7 +5,17 @@ This code has been developed as part of a dissertation project that seeks to exp
 
 The program consists of two phases: a growth phase, in which the plasmoid is initialised, and a migration phase, where either amoebic or chemotactic motion is observed. The slime 'migrates' by softening its cell wall, accepting an empty cell and pushing this cell through itself. In chemotactic motion, the slime preferentially absorbs empty cells from areas closest to the food source, which creates a net motion towards this (a mechanism more easily observed by enabling bubble printing). See Gunji paper for full explanation and algorithm.
 
-To use the code, compile and run the file slime.cpp in c++0x. The program invites the user to declare variables, which will alter the outcome of the simulation. In order, these are:
+TO USE THIS CODE
+Download the file, and open Terminal in the folder where you downloaded it to.
+
+Run the command:
+g++ -O3 -std=c++0x slime.cpp -o slime
+
+then the command:
+./slime
+
+
+The program invites the user to declare variables, which will alter the outcome of the simulation. In order, these are:
 
 
 
